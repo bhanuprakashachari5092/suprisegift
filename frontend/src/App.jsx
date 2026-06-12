@@ -250,7 +250,7 @@ function MainApp() {
               <Route path="/orders" element={user ? <OrderHistory /> : <Navigate to="/login" />} />
 
               {/* Admin Portal (Unprotected as requested) */}
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin" element={<Admin products={products} refreshProducts={fetchProducts} />} />
 
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" />} />
