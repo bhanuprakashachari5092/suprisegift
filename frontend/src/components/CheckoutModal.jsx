@@ -213,11 +213,53 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
               textAlign: 'center',
               animation: 'scaleIn 0.3s ease'
             }}>
-              <Loader2 size={44} className="animate-spin" style={{ color: 'var(--primary-pink)', marginBottom: '16px' }} />
+              <div style={{ marginBottom: '20px' }}>
+                <svg viewBox="0 0 100 100" width="80" height="80" className="gift-box-animation">
+                  <style>{`
+                    @keyframes wobble {
+                      0%, 100% { transform: rotate(0deg); }
+                      15% { transform: rotate(-8deg); }
+                      30% { transform: rotate(6deg); }
+                      45% { transform: rotate(-4deg); }
+                      60% { transform: rotate(3deg); }
+                      75% { transform: rotate(-1deg); }
+                    }
+                    @keyframes lid-bounce {
+                      0%, 100% { transform: translateY(0); }
+                      50% { transform: translateY(-12px) rotate(-6deg); }
+                    }
+                    .gift-box-animation {
+                      animation: wobble 1.2s infinite ease-in-out;
+                    }
+                    .gift-lid {
+                      animation: lid-bounce 1.2s infinite ease-in-out;
+                      transform-origin: center bottom;
+                      fill: #f43f5e;
+                    }
+                    .gift-body {
+                      fill: #db2777;
+                    }
+                    .gift-ribbon {
+                      fill: #fbbf24;
+                    }
+                  `}</style>
+                  {/* Box Body */}
+                  <rect x="25" y="45" width="50" height="40" rx="4" className="gift-body" />
+                  {/* Box Ribbon vertical */}
+                  <rect x="46" y="45" width="8" height="40" className="gift-ribbon" />
+                  {/* Box Lid */}
+                  <g className="gift-lid">
+                    <rect x="21" y="33" width="58" height="12" rx="3" />
+                    <rect x="46" y="33" width="8" height="12" fill="#fbbf24" />
+                    {/* Ribbon Bow */}
+                    <path d="M 50 33 C 40 20, 35 33, 50 33 C 60 20, 65 33, 50 33" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2" />
+                  </g>
+                </svg>
+              </div>
               <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--dark-pink)', margin: 0 }}>
                 Booking...
               </h3>
-              <p style={{ fontSize: '13px', color: 'var(--gray-600)', marginTop: '8px' }}>Please wait while we process your request...</p>
+              <p style={{ fontSize: '13px', color: 'var(--gray-600)', marginTop: '8px' }}>Unwrapping your surprise...</p>
             </div>
           </div>
         )}
