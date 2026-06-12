@@ -163,8 +163,33 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
       <div 
         className="modal-content animate-fade-in" 
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: orderPlaced ? '450px' : '550px' }}
+        style={{ maxWidth: orderPlaced ? '450px' : '550px', position: 'relative' }}
       >
+        {/* Loading Overlay */}
+        {submitting && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            borderRadius: '32px'
+          }}>
+            <Loader2 size={48} className="animate-spin" style={{ color: 'var(--primary-pink)', marginBottom: '16px' }} />
+            <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--dark-pink)', margin: 0 }}>
+              Booking...
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--gray-600)', marginTop: '8px' }}>Please wait while we process your request...</p>
+          </div>
+        )}
+
         {/* Close button */}
         <button className="modal-close-btn" onClick={onClose} disabled={submitting}>
           <X size={18} />
@@ -353,7 +378,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
                   disabled={submitting}
                 >
                   {submitting && <Loader2 size={16} className="animate-spin" />}
-                  {submitting ? 'Placing Order...' : 'Place Order'}
+                  {submitting ? 'Booking...' : 'Place Order'}
                 </button>
               </div>
             </form>
