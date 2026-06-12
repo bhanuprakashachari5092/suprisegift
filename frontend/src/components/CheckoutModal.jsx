@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, MessageCircle, Calendar, Clock, MapPin, Phone, User, Loader2, AlertCircle } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, user }) {
   const [formData, setFormData] = useState({

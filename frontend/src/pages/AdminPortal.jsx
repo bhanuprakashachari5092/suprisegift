@@ -4,7 +4,7 @@ import {
   Trash2, Edit, MessageSquare, LogOut, AlertCircle, 
   FileImage, Loader2
 } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export default function AdminPortal({ products, refreshProducts }) {
   // Admin Auth State

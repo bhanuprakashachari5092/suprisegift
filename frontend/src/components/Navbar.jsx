@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Menu, X, LogOut, LogIn, Gift } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar({ cartCount, onCartClick, user }) {

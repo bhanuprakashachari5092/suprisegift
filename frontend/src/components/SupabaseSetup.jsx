@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Database, Key, Globe, CheckCircle2, Copy, Play } from 'lucide-react';
-import { saveSupabaseConfig } from '../supabaseClient';
+import { saveSupabaseConfig } from '../lib/supabaseClient';
 
 export default function SupabaseSetup() {
   const [url, setUrl] = useState('');

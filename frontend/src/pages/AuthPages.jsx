@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Phone, ArrowRight, Gift, LogIn, AlertCircle } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
