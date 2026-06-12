@@ -50,6 +50,9 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
       return;
     }
 
+    // Add a minimum delay of 1.5s so the user can see the "Booking..." animation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     const orderId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
     const addressStr = formData.deliveryType === 'Home Delivery' ? formData.address : 'Self Pickup at Store';
 
