@@ -409,14 +409,36 @@ export default function AdminPortal({ products, refreshProducts }) {
             <p style={{ fontSize: '13px', color: 'var(--gray-600)' }}>Manage order fulfillments and adjust products in real-time.</p>
           </div>
 
-          <button 
-            onClick={handleLogout}
-            className="btn btn-secondary"
-            style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-          >
-            <LogOut size={14} />
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              onClick={() => {
+                setEditingProduct(null);
+                setProductFormData({
+                  name: '',
+                  description: '',
+                  price: '',
+                  category: 'Gift wrapping and gift',
+                  image: '',
+                  tags: '',
+                  inStock: true
+                });
+                setShowProductForm(true);
+              }}
+              className="btn btn-primary"
+              style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Plus size={14} />
+              Add Product
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="btn btn-secondary"
+              style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <LogOut size={14} />
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Customer Booking Requests List (Directly displayed, no tabs) */}
@@ -606,6 +628,218 @@ export default function AdminPortal({ products, refreshProducts }) {
           </div>
 
       </div>
+
+      {/* Add Product Modal Overlay */}
+      {showProductForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.45)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }} onClick={() => setShowProductForm(false)}>
+          <div style={{
+            background: 'var(--white)',
+            borderRadius: '24px',
+            padding: '36px',
+            width: '95%',
+            maxWidth: '520px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+            position: 'relative'
+          }} onClick={(e) => e.stopPropagation()}>
+            
+            <h3 style={{ fontSize: '22px', color: 'var(--dark-pink)', marginBottom: '24px', fontWeight: '800' }}>
+              Add New Product Collection
+            </h3>
+
+            <form onSubmit={handleProductSubmit}>
+              {/* Name */}
+              <div className="form-group">
+                <label className="form-label">Product Name *</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="e.g. Dreamy Rose Gold Heart Balloon" 
+                  value={productFormData.name}
+                  onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
+                  required 
+                />
+              </div>
+
+              {/* Description */}
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea 
+                  className="form-input form-textarea" 
+                  placeholder="Enter description, Combo details..." 
+                  value={productFormData.description}
+                  onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
+                  style={{ minHeight: '60px' }}
+                />
+              </div>
+
+              {/* Category & Price */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Category *</label>
+                  <select 
+                    className="form-input"
+                    value={productFormData.category}
+                    onChange={(e) => setProductFormData({...productFormData, category: e.target.value})}
+                  >
+                    <option value="Gift wrapping and gift">Gift wrapping and gift</option>
+                    <option value="Balloon bouquets">Balloon bouquets</option>
+                    <option value="Flower bouquets">Flower bouquets</option>
+                    <option value="Birthday balloon decoration">Birthday balloon decoration</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Price (INR) *</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    placeholder="Price in ₹" 
+                    value={productFormData.price}
+                    onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
+                    min="0"
+                    required 
+                  />
+                </div>
+              </div>
+
+              {/* Image Upload Input */}
+              <div className="form-group">
+                <label className="form-label">Product Image *</label>
+                <div style={{
+                  border: '2px dashed var(--primary-pink)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  textAlign: 'center',
+                  backgroundColor: 'var(--soft-pink-bg)',
+                  position: 'relative',
+                  cursor: 'pointer'
+                }}>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      opacity: 0,
+                      cursor: 'pointer'
+                    }}
+                    disabled={uploadingImage}
+                  />
+                  {uploadingImage ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <Loader2 className="animate-spin" size={24} style={{ color: 'var(--primary-pink)' }} />
+                      <span style={{ fontSize: '13px', color: 'var(--gray-600)' }}>Uploading image to Supabase...</span>
+                    </div>
+                  ) : productFormData.image ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+                      <img 
+                        src={productFormData.image} 
+                        alt="Preview" 
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--light-pink)' }} 
+                      />
+                      <div style={{ textAlign: 'left' }}>
+                        <span style={{ fontSize: '12px', color: '#10b981', display: 'block', fontWeight: 'bold' }}>Image Uploaded!</span>
+                        <span style={{ fontSize: '10px', color: 'var(--gray-600)', wordBreak: 'break-all' }}>{productFormData.image.substring(0, 30)}...</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                      <FileImage size={24} style={{ color: 'var(--primary-pink)' }} />
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--dark-pink)' }}>Click to upload product image</span>
+                      <span style={{ fontSize: '11px', color: 'var(--gray-600)' }}>Supports PNG, JPG, JPEG</span>
+                    </div>
+                  )}
+                </div>
+                {uploadError && (
+                  <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '6px' }}>
+                    {uploadError}
+                  </div>
+                )}
+                
+                {/* Backup Web URL Input */}
+                <div style={{ marginTop: '12px' }}>
+                  <label style={{ fontSize: '11px', color: 'var(--gray-600)', marginBottom: '4px', display: 'block' }}>Or paste direct image URL address:</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="https://example.com/image.jpg" 
+                    value={productFormData.image}
+                    onChange={(e) => setProductFormData({...productFormData, image: e.target.value})}
+                    style={{ fontSize: '12px', borderRadius: '8px' }}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Tags & Stock Status */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Badges / Tags (Comma separated)</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. Combo, Bestseller" 
+                    value={productFormData.tags}
+                    onChange={(e) => setProductFormData({...productFormData, tags: e.target.value})}
+                  />
+                </div>
+
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label className="form-label">Inventory Status</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '44px', fontSize: '14px', cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={productFormData.inStock}
+                      onChange={(e) => setProductFormData({...productFormData, inStock: e.target.checked})}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--primary-pink)' }}
+                    />
+                    In Stock & Available
+                  </label>
+                </div>
+              </div>
+
+              {/* Action row */}
+              <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowProductForm(false)}
+                  className="btn btn-secondary" 
+                  style={{ flexGrow: 1, borderRadius: '20px' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ flexGrow: 1, borderRadius: '20px' }}
+                >
+                  Save Product
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Developer Credit Footer */}
       <div style={{
