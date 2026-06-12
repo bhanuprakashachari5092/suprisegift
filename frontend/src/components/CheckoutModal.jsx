@@ -168,28 +168,42 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: orderPlaced ? '450px' : '550px', position: 'relative' }}
       >
-        {/* Loading Overlay */}
+        {/* Fullscreen Popup Loading Overlay */}
         {submitting && (
           <div style={{
-            position: 'absolute',
+            position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 100,
-            borderRadius: '32px'
+            zIndex: 99999
           }}>
-            <Loader2 size={48} className="animate-spin" style={{ color: 'var(--primary-pink)', marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--dark-pink)', margin: 0 }}>
-              Booking...
-            </h3>
-            <p style={{ fontSize: '13px', color: 'var(--gray-600)', marginTop: '8px' }}>Please wait while we process your request...</p>
+            <div style={{
+              background: 'var(--white)',
+              padding: '36px 30px',
+              borderRadius: '24px',
+              boxShadow: '0 20px 50px rgba(136, 14, 79, 0.15)',
+              border: '1px solid var(--light-pink)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '90%',
+              maxWidth: '300px',
+              textAlign: 'center',
+              animation: 'scaleIn 0.3s ease'
+            }}>
+              <Loader2 size={44} className="animate-spin" style={{ color: 'var(--primary-pink)', marginBottom: '16px' }} />
+              <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--dark-pink)', margin: 0 }}>
+                Booking...
+              </h3>
+              <p style={{ fontSize: '13px', color: 'var(--gray-600)', marginTop: '8px' }}>Please wait while we process your request...</p>
+            </div>
           </div>
         )}
 
