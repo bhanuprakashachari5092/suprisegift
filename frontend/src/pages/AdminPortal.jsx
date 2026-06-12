@@ -170,6 +170,7 @@ export default function AdminPortal({ products, refreshProducts }) {
       } else {
         // Add mode in Supabase
         const newProduct = {
+          id: 'p-' + Math.floor(1000 + Math.random() * 9000),
           name: productFormData.name,
           description: productFormData.description,
           price: priceNum,
