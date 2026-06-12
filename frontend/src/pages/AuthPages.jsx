@@ -7,13 +7,16 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -24,9 +27,32 @@ export function LoginPage() {
       if (error) throw error;
       navigate('/');
     } catch (err) {
-      setErrorMsg(err.message || 'An error occurred during sign in.');
+      if (err.message === 'Email not confirmed') {
+        setErrorMsg('Email not confirmed');
+      } else {
+        setErrorMsg(err.message || 'An error occurred during sign in.');
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setResendLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim(),
+      });
+      if (error) throw error;
+      setSuccessMsg('Confirmation email resent! Please check your inbox.');
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to resend confirmation email.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -81,11 +107,48 @@ export function LoginPage() {
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: '8px',
             textAlign: 'left'
           }}>
-            <AlertCircle size={16} style={{ flexShrink: 0 }} />
-            <span>{errorMsg}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              <span>{errorMsg === 'Email not confirmed' ? 'Please confirm your email before logging in.' : errorMsg}</span>
+            </div>
+            {errorMsg === 'Email not confirmed' && (
+              <button 
+                type="button" 
+                onClick={handleResendConfirmation}
+                disabled={resendLoading}
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: 'var(--primary-pink)', 
+                  fontWeight: '700', 
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontSize: '11px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {resendLoading ? 'Sending...' : 'Resend Email'}
+              </button>
+            )}
+          </div>
+        )}
+
+        {successMsg && (
+          <div style={{
+            background: '#ecfdf5',
+            border: '1px solid #d1fae5',
+            color: '#059669',
+            padding: '10px 14px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            marginBottom: '20px',
+            textAlign: 'left'
+          }}>
+            {successMsg}
           </div>
         )}
 

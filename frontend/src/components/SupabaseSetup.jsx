@@ -84,7 +84,32 @@ CREATE POLICY "Allow users to read their own order items" ON public.order_items 
         AND (orders.user_id = auth.uid() OR orders.user_id IS NULL)
     )
 );
-CREATE POLICY "Allow admin all access on order_items" ON public.order_items FOR ALL USING (true);`;
+CREATE POLICY "Allow admin all access on order_items" ON public.order_items FOR ALL USING (true);
+
+-- 4. Create the product-images bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Set up access controls (Row Level Security) for the bucket
+-- Allow public read access to the bucket so images can be displayed
+CREATE POLICY "Public Access"
+ON storage.objects FOR SELECT
+USING ( bucket_id = 'product-images' );
+
+-- Allow anyone to upload images (For the Admin Portal)
+CREATE POLICY "Allow Uploads"
+ON storage.objects FOR INSERT
+WITH CHECK ( bucket_id = 'product-images' );
+
+-- Allow anyone to update/delete images (For the Admin Portal)
+CREATE POLICY "Allow Updates"
+ON storage.objects FOR UPDATE
+USING ( bucket_id = 'product-images' );
+
+CREATE POLICY "Allow Deletes"
+ON storage.objects FOR DELETE
+USING ( bucket_id = 'product-images' );`;
 
   const copySql = () => {
     navigator.clipboard.writeText(sqlCode);

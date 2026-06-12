@@ -11,7 +11,7 @@ import Home from './pages/Home';
 import Contact from './pages/Contact';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import OrderHistory from './pages/OrderHistory';
-import AdminPortal from './pages/AdminPortal';
+import Admin from './pages/AdminPortal';
 import { INITIAL_PRODUCTS } from './data/seedData';
 import { ShoppingBag, Loader2 } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
@@ -250,7 +250,7 @@ function MainApp() {
               <Route path="/orders" element={user ? <OrderHistory /> : <Navigate to="/login" />} />
 
               {/* Admin Portal (Unprotected as requested) */}
-              <Route path="/admin" element={<AdminPortal products={products} refreshProducts={fetchProducts} />} />
+              <Route path="/admin" element={<Admin />} />
 
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" />} />

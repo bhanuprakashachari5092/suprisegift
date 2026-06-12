@@ -434,6 +434,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
                 setOrderPlaced(false);
                 setPlacedOrderDetails(null);
                 onClose();
+                window.location.href = '/admin';
               }}
               className="btn btn-secondary"
               style={{
@@ -441,6 +442,27 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
                 padding: '12px 20px',
                 borderRadius: '30px',
                 marginTop: '12px',
+                fontSize: '14px',
+                border: '1px solid var(--light-pink)',
+                color: 'var(--dark-pink)',
+                backgroundColor: 'var(--soft-pink-bg)'
+              }}
+            >
+              Go to Admin Portal (View Bookings)
+            </button>
+
+            <button 
+              onClick={() => {
+                setOrderPlaced(false);
+                setPlacedOrderDetails(null);
+                onClose();
+              }}
+              className="btn btn-secondary"
+              style={{
+                width: '100%',
+                padding: '12px 20px',
+                borderRadius: '30px',
+                marginTop: '8px',
                 fontSize: '14px'
               }}
             >
