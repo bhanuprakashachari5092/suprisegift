@@ -38,6 +38,21 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleClose = () => {
+    setOrderPlaced(false);
+    setPlacedOrderDetails(null);
+    setFormData({
+      name: user ? (user.user_metadata?.full_name || '') : '',
+      phone: user ? (user.user_metadata?.phone_number || '') : '',
+      deliveryType: 'Home Delivery',
+      address: '',
+      date: '',
+      timeSlot: '12:00 PM - 03:00 PM',
+      notes: ''
+    });
+    onClose();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -162,11 +177,11 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div 
         className="modal-content animate-fade-in" 
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: orderPlaced ? '450px' : '550px', position: 'relative' }}
+        style={{ maxWidth: (!user || orderPlaced) ? '450px' : '550px', position: 'relative' }}
       >
         {/* Fullscreen Popup Loading Overlay */}
         {submitting && (
@@ -208,11 +223,48 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
         )}
 
         {/* Close button */}
-        <button className="modal-close-btn" onClick={onClose} disabled={submitting}>
+        <button className="modal-close-btn" onClick={handleClose} disabled={submitting}>
           <X size={18} />
         </button>
 
-        {!orderPlaced ? (
+        {!user ? (
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              backgroundColor: '#fee2e2',
+              color: '#ef4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px auto'
+            }}>
+              <AlertCircle size={36} />
+            </div>
+            <h2 style={{ fontSize: '22px', color: 'var(--dark-pink)', marginBottom: '12px', fontWeight: '800' }}>
+              Login Required
+            </h2>
+            <p style={{ fontSize: '14px', color: 'var(--gray-600)', marginBottom: '24px', lineHeight: '1.5' }}>
+              You must be logged in to your account to place a surprise booking.
+            </p>
+            <button 
+              onClick={() => {
+                handleClose();
+                window.location.href = '/login';
+              }}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                borderRadius: '30px',
+                fontSize: '15px'
+              }}
+            >
+              Login to Proceed
+            </button>
+          </div>
+        ) : !orderPlaced ? (
           <>
             <h2 style={{ fontSize: '24px', color: 'var(--dark-pink)', marginBottom: '6px' }}>Checkout Details</h2>
             <p style={{ fontSize: '13px', color: 'var(--gray-600)', marginBottom: '24px' }}>
@@ -472,11 +524,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, clearCart, u
             </button>
 
             <button 
-              onClick={() => {
-                setOrderPlaced(false);
-                setPlacedOrderDetails(null);
-                onClose();
-              }}
+              onClick={handleClose}
               className="btn btn-secondary"
               style={{
                 width: '100%',
