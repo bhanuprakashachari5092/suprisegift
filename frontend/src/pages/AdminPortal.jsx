@@ -384,396 +384,107 @@ export default function AdminPortal({ products, refreshProducts }) {
           </div>
         </div>
 
-        {/* Dashboard Navigation Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          marginBottom: '32px',
-          borderBottom: '2px solid var(--gray-100)',
-          paddingBottom: '2px'
-        }}>
-          {[
-            { id: 'dashboard', label: 'Stats & Charts', icon: <LayoutDashboard size={16} /> },
-            { id: 'orders', label: 'Manage Orders', icon: <ClipboardList size={16} /> }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveSubTab(tab.id);
-                setShowProductForm(false);
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '12px 20px',
-                fontSize: '15px',
-                fontWeight: '600',
-                color: activeSubTab === tab.id ? 'var(--primary-pink)' : 'var(--gray-600)',
-                borderBottom: activeSubTab === tab.id ? '3px solid var(--primary-pink)' : '3px solid transparent',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'var(--transition-smooth)'
-              }}
+        {/* Customer Booking Requests List (Directly displayed, no tabs) */}
+        <div className="animate-fade-in">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '20px', color: 'var(--dark-pink)', margin: 0 }}>Customer Booking Requests ({orders.length})</h3>
+            <button 
+              onClick={fetchOrders}
+              className="btn btn-secondary"
+              style={{ padding: '6px 14px', borderRadius: '15px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+              disabled={ordersLoading}
             >
-              {tab.icon}
-              {tab.label}
+              {ordersLoading && <Loader2 size={12} className="animate-spin" />}
+              Refresh Orders
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* Tab Content 1: Overview stats */}
-        {activeSubTab === 'dashboard' && (
-          <div className="animate-fade-in">
-            {/* Stats Cards */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '20px',
-              marginBottom: '40px'
-            }} className="admin-stats-grid">
-
-              {/* Stat 2 */}
-              <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-100)' }}>
-                <span style={{ fontSize: '13px', color: 'var(--gray-600)', fontWeight: 600 }}>Pending Fulfillments</span>
-                <h3 style={{ fontSize: '32px', color: '#f59e0b', marginTop: '8px' }}>{pendingOrders}</h3>
-              </div>
-
-              {/* Stat 3 */}
-              <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-100)' }}>
-                <span style={{ fontSize: '13px', color: 'var(--gray-600)', fontWeight: 600 }}>Total Bookings</span>
-                <h3 style={{ fontSize: '32px', color: 'var(--primary-pink)', marginTop: '8px' }}>{orders.length}</h3>
-              </div>
-
-              {/* Stat 4 */}
-              <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-100)' }}>
-                <span style={{ fontSize: '13px', color: 'var(--gray-600)', fontWeight: 600 }}>Completed Earnings</span>
-                <h3 style={{ fontSize: '32px', color: '#10b981', marginTop: '8px' }}>₹{totalEarnings}</h3>
-              </div>
-
+          {ordersLoading && orders.length === 0 ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+              <Loader2 className="animate-spin" size={30} style={{ color: 'var(--primary-pink)' }} />
             </div>
-
-
-
-            <style dangerouslySetInnerHTML={{__html: `
-              @media (max-width: 900px) {
-                .admin-stats-grid {
-                  grid-template-columns: repeat(2, 1fr) !important;
-                }
-              }
-              @media (max-width: 480px) {
-                .admin-stats-grid {
-                  grid-template-columns: 1fr !important;
-                }
-              }
-            `}} />
-          </div>
-        )}
-
-        {/* Tab Content 2: Manage Products */}
-        {activeSubTab === 'products' && (
-          <div className="animate-fade-in">
-            {!showProductForm ? (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-                  <h3 style={{ fontSize: '20px', color: 'var(--dark-pink)' }}>Catalog Directory ({products.length})</h3>
-                  <button 
-                    onClick={() => {
-                      setEditingProduct(null);
-                      setProductFormData({
-                        name: '',
-                        description: '',
-                        price: '',
-                        category: 'Gift wrapping and gift',
-                        image: '',
-                        tags: '',
-                        inStock: true
-                      });
-                      setShowProductForm(true);
-                    }}
-                    className="btn btn-primary"
-                    style={{ padding: '10px 20px', fontSize: '13px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                  >
-                    <Plus size={16} /> Add Product
-                  </button>
-                </div>
-
-                {/* Table list */}
-                <div style={{ overflowX: 'auto', background: 'var(--white)', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-100)' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }} className="admin-table">
-                    <thead>
-                      <tr style={{ background: 'var(--soft-pink-bg)', borderBottom: '1px solid var(--light-pink)' }}>
-                        <th style={{ padding: '16px 20px', fontSize: '13px', color: 'var(--dark-pink)', fontWeight: 800 }}>Image</th>
-                        <th style={{ padding: '16px', fontSize: '13px', color: 'var(--dark-pink)', fontWeight: 800 }}>Product Details</th>
-                        <th style={{ padding: '16px', fontSize: '13px', color: 'var(--dark-pink)', fontWeight: 800 }}>Category</th>
-                        <th style={{ padding: '16px', fontSize: '13px', color: 'var(--dark-pink)', fontWeight: 800 }}>Price</th>
-                        <th style={{ padding: '16px', fontSize: '13px', color: 'var(--dark-pink)', fontWeight: 800 }}>Status</th>
-                        <th style={{ padding: '16px 20px', fontSize: '13px', color: 'var(--dark-pink)', fontWeight: 800, textAlign: 'center' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {products.map((p) => (
-                        <tr key={p.id} style={{ borderBottom: '1px solid var(--gray-100)' }}>
-                          <td style={{ padding: '16px 20px' }}>
-                            <img 
-                              src={p.image} 
-                              alt={p.name} 
-                              style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--light-pink)' }}
-                              onError={(e) => {
-                                e.target.src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600";
-                              }}
-                            />
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            <strong style={{ display: 'block', fontSize: '14px', color: 'var(--gray-800)' }}>{p.name}</strong>
-                            <span style={{ fontSize: '11px', color: 'var(--gray-600)' }}>ID: {p.id}</span>
-                          </td>
-                          <td style={{ padding: '16px', fontSize: '13px', color: 'var(--gray-800)' }}>{p.category}</td>
-                          <td style={{ padding: '16px', fontSize: '14px', fontWeight: '700', color: 'var(--dark-pink)' }}>₹{p.price}</td>
-                          <td style={{ padding: '16px' }}>
-                            <span style={{
-                              background: p.inStock ? '#ecfdf5' : '#fef2f2',
-                              color: p.inStock ? '#10b981' : '#ef4444',
-                              fontSize: '11px',
-                              fontWeight: '700',
-                              padding: '2px 8px',
-                              borderRadius: '10px'
-                            }}>
-                              {p.inStock ? 'In Stock' : 'Out of Stock'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '16px 20px', textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', gap: '8px' }}>
-                              <button 
-                                onClick={() => handleEditProduct(p)}
-                                className="btn btn-secondary btn-icon"
-                                style={{ width: '32px', height: '32px', borderColor: 'var(--light-pink)', color: 'var(--primary-pink)' }}
-                                title="Edit Product"
-                              >
-                                <Edit size={14} />
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteProduct(p.id)}
-                                className="btn btn-icon"
-                                style={{ width: '32px', height: '32px', background: '#fef2f2', border: 'none', color: '#ef4444' }}
-                                title="Delete Product"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            ) : (
-              /* Add/Edit Form Panel */
-              <div style={{
-                background: 'var(--white)',
-                border: '1px solid rgba(240, 98, 146, 0.2)',
-                borderRadius: '24px',
-                padding: '36px',
-                boxShadow: 'var(--shadow-md)',
-                maxWidth: '650px',
-                margin: '0 auto'
-              }}>
-                <h3 style={{ fontSize: '22px', color: 'var(--dark-pink)', marginBottom: '24px' }}>
-                  {editingProduct ? `Modify: ${editingProduct.name}` : 'Add New Product Collection'}
-                </h3>
-
-                <form onSubmit={handleProductSubmit}>
-                  
-                  {/* Name */}
-                  <div className="form-group">
-                    <label className="form-label">Product Name *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. Dreamy Rose Gold Heart Balloon" 
-                      value={productFormData.name}
-                      onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
-                      required 
-                    />
-                  </div>
-
-                  {/* Description */}
-                  <div className="form-group">
-                    <label className="form-label">Description</label>
-                    <textarea 
-                      className="form-input form-textarea" 
-                      placeholder="Enter description, size specs, what combo contains..." 
-                      value={productFormData.description}
-                      onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
-                      style={{ minHeight: '80px' }}
-                    />
-                  </div>
-
-                  {/* Category & Price */}
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">Category *</label>
-                      <select 
-                        className="form-input"
-                        value={productFormData.category}
-                        onChange={(e) => setProductFormData({...productFormData, category: e.target.value})}
-                      >
-                        <option value="Gift wrapping and gift">Gift wrapping and gift</option>
-                        <option value="Balloon bouquets">Balloon bouquets</option>
-                        <option value="Flower bouquets">Flower bouquets</option>
-                        <option value="Birthday balloon decoration">Birthday balloon decoration</option>
-                      </select>
+          ) : orders.length === 0 ? (
+            <div style={{
+              background: 'var(--white)',
+              padding: '48px',
+              borderRadius: '16px',
+              textAlign: 'center',
+              border: '1px solid var(--gray-100)',
+              color: 'var(--gray-600)'
+            }}>
+              No orders placed yet.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {orders.map((o) => (
+                <div 
+                  key={o.id}
+                  style={{
+                    background: 'var(--white)',
+                    border: '1px solid var(--gray-200)',
+                    borderRadius: '16px',
+                    padding: '24px',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  {/* Top Row Order ID and Status selection */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    borderBottom: '1px dashed var(--gray-100)',
+                    paddingBottom: '16px',
+                    marginBottom: '16px'
+                  }}>
+                    <div>
+                      <strong style={{ fontSize: '16px', color: 'var(--dark-pink)' }}>Order #{o.id}</strong>
+                      <span style={{ fontSize: '11px', color: 'var(--gray-600)', marginLeft: '12px' }}>
+                        Placed on: {new Date(o.createdAt).toLocaleString()}
+                      </span>
                     </div>
 
-                    <div className="form-group">
-                      <label className="form-label">Price (INR) *</label>
-                      <input 
-                        type="number" 
-                        className="form-input" 
-                        placeholder="Price in ₹" 
-                        value={productFormData.price}
-                        onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
-                        min="0"
-                        required 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Image Upload Input */}
-                  <div className="form-group">
-                    <label className="form-label">Product Image *</label>
-                    <div style={{
-                      border: '2px dashed var(--primary-pink)',
-                      borderRadius: '16px',
-                      padding: '20px',
-                      textAlign: 'center',
-                      backgroundColor: 'var(--soft-pink-bg)',
-                      position: 'relative',
-                      cursor: 'pointer',
-                      transition: 'var(--transition-smooth)'
-                    }}>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={handleImageUpload} 
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {/* Status update select */}
+                      <select
+                        value={o.status}
+                        onChange={(e) => handleStatusChange(o.id, e.target.value)}
                         style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          opacity: 0,
-                          cursor: 'pointer'
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--gray-200)',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          backgroundColor: o.status === 'Completed' ? '#ecfdf5' : o.status === 'Processing' ? '#eff6ff' : o.status === 'Cancelled' ? '#fef2f2' : '#fffbeb',
+                          color: o.status === 'Completed' ? '#10b981' : o.status === 'Processing' ? '#3b82f6' : o.status === 'Cancelled' ? '#ef4444' : '#d97706',
                         }}
-                        disabled={uploadingImage}
-                      />
-                      {uploadingImage ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                          <Loader2 className="animate-spin" size={24} style={{ color: 'var(--primary-pink)' }} />
-                          <span style={{ fontSize: '13px', color: 'var(--gray-600)' }}>Uploading image to Supabase...</span>
-                        </div>
-                      ) : productFormData.image ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-                          <img 
-                            src={productFormData.image} 
-                            alt="Preview" 
-                            style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--light-pink)' }} 
-                          />
-                          <div style={{ textAlign: 'left' }}>
-                            <span style={{ fontSize: '12px', color: '#10b981', display: 'block', fontWeight: 'bold' }}>Image Uploaded!</span>
-                            <span style={{ fontSize: '10px', color: 'var(--gray-600)', wordBreak: 'break-all' }}>{productFormData.image.substring(0, 45)}...</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                          <FileImage size={24} style={{ color: 'var(--primary-pink)' }} />
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--dark-pink)' }}>Click to upload product image</span>
-                          <span style={{ fontSize: '11px', color: 'var(--gray-600)' }}>Supports PNG, JPG, JPEG</span>
-                        </div>
-                      )}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+
+                      <button
+                        onClick={() => handleDeleteOrder(o.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
+                        title="Delete Order Record"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                    {uploadError && (
-                      <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <AlertCircle size={12} /> {uploadError}
-                      </div>
-                    )}
+                  </div>
+
+                  {/* Customer & Delivery Information grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '24px',
+                    marginBottom: '20px',
+                    fontSize: '13px'
+                  }} className="order-details-info">
                     
-                    {/* Backup Web URL Input */}
-                    <div style={{ marginTop: '12px' }}>
-                      <label style={{ fontSize: '11px', color: 'var(--gray-600)', marginBottom: '4px', display: 'block' }}>Or paste direct image URL address:</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        placeholder="https://example.com/image.jpg" 
-                        value={productFormData.image}
-                        onChange={(e) => setProductFormData({...productFormData, image: e.target.value})}
-                        style={{ fontSize: '12px', borderRadius: '8px' }}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Tags & Stock Status */}
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">Badges / Tags (Comma separated)</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        placeholder="e.g. Combo, Bestseller, Fresh" 
-                        value={productFormData.tags}
-                        onChange={(e) => setProductFormData({...productFormData, tags: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
-                      <label className="form-label">Inventory Status</label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '44px', fontSize: '14px', cursor: 'pointer' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={productFormData.inStock}
-                          onChange={(e) => setProductFormData({...productFormData, inStock: e.target.checked})}
-                          style={{ width: '18px', height: '18px', accentColor: 'var(--primary-pink)' }}
-                        />
-                        In Stock & Available
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Action row */}
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowProductForm(false)}
-                      className="btn btn-secondary" 
-                      style={{ flexGrow: 1, borderRadius: '20px' }}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary" 
-                      style={{ flexGrow: 1, borderRadius: '20px' }}
-                    >
-                      Save Product
-                    </button>
-                  </div>
-
-                </form>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Tab Content 3: Manage Orders */}
-        {activeSubTab === 'orders' && (
-          <div className="animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '20px', color: 'var(--dark-pink)', margin: 0 }}>Customer Booking Requests ({orders.length})</h3>
-              <button 
-                onClick={fetchOrders}
                 className="btn btn-secondary"
                 style={{ padding: '6px 14px', borderRadius: '15px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
                 disabled={ordersLoading}
@@ -953,7 +664,6 @@ export default function AdminPortal({ products, refreshProducts }) {
               </div>
             )}
           </div>
-        )}
 
       </div>
 
