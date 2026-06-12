@@ -394,7 +394,6 @@ export default function AdminPortal({ products, refreshProducts }) {
         }}>
           {[
             { id: 'dashboard', label: 'Stats & Charts', icon: <LayoutDashboard size={16} /> },
-            { id: 'products', label: 'Manage Products', icon: <ShoppingBag size={16} /> },
             { id: 'orders', label: 'Manage Orders', icon: <ClipboardList size={16} /> }
           ].map((tab) => (
             <button
@@ -430,16 +429,10 @@ export default function AdminPortal({ products, refreshProducts }) {
             {/* Stats Cards */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '20px',
               marginBottom: '40px'
             }} className="admin-stats-grid">
-              
-              {/* Stat 1 */}
-              <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-100)' }}>
-                <span style={{ fontSize: '13px', color: 'var(--gray-600)', fontWeight: 600 }}>Total Catalog Items</span>
-                <h3 style={{ fontSize: '32px', color: 'var(--dark-pink)', marginTop: '8px' }}>{products.length}</h3>
-              </div>
 
               {/* Stat 2 */}
               <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-100)' }}>
