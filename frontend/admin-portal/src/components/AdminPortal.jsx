@@ -19,8 +19,9 @@ export default function AdminPortal({ products, refreshProducts }) {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
-  // Dashboard Sub-tabs: 'dashboard', 'products', 'orders'
+  // Dashboard Sub-tabs: 'orders', 'products'
   const [activeSubTab, setActiveSubTab] = useState('orders');
+  const [productSearchQuery, setProductSearchQuery] = useState('');
 
   // Product CRUD States
   const [showProductForm, setShowProductForm] = useState(false);
@@ -298,6 +299,12 @@ export default function AdminPortal({ products, refreshProducts }) {
     .filter(o => o.status === 'Completed')
     .reduce((sum, o) => sum + o.total, 0);
 
+  // Filter products by search query
+  const filteredProducts = (products || []).filter(p => 
+    p.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+    p.category.toLowerCase().includes(productSearchQuery.toLowerCase())
+  );
+
   // Authentication Card View
   if (!isAuthenticated) {
     return (
@@ -441,191 +448,328 @@ export default function AdminPortal({ products, refreshProducts }) {
           </div>
         </div>
 
-        {/* Customer Booking Requests List (Directly displayed, no tabs) */}
-        <div className="animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '20px', color: 'var(--dark-pink)', margin: 0 }}>Customer Booking Requests ({orders.length})</h3>
-              <button 
-                onClick={fetchOrders}
-                className="btn btn-secondary"
-                style={{ padding: '6px 14px', borderRadius: '15px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                disabled={ordersLoading}
-              >
-                {ordersLoading && <Loader2 size={12} className="animate-spin" />}
-                Refresh Orders
-              </button>
-            </div>
+        {/* Tab Switcher */}
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '28px', borderBottom: '2px solid var(--light-pink)', paddingBottom: '2px' }}>
+          <button 
+            onClick={() => setActiveSubTab('orders')}
+            style={{
+              padding: '10px 20px',
+              fontSize: '15px',
+              fontWeight: '800',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeSubTab === 'orders' ? '4px solid var(--primary-pink)' : '4px solid transparent',
+              color: activeSubTab === 'orders' ? 'var(--dark-pink)' : 'var(--gray-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s'
+            }}
+          >
+            <ClipboardList size={18} />
+            Manage Bookings
+          </button>
+          <button 
+            onClick={() => setActiveSubTab('products')}
+            style={{
+              padding: '10px 20px',
+              fontSize: '15px',
+              fontWeight: '800',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeSubTab === 'products' ? '4px solid var(--primary-pink)' : '4px solid transparent',
+              color: activeSubTab === 'products' ? 'var(--dark-pink)' : 'var(--gray-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s'
+            }}
+          >
+            <ShoppingBag size={18} />
+            Manage Products
+          </button>
+        </div>
 
-            {ordersLoading && orders.length === 0 ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-                <Loader2 className="animate-spin" size={30} style={{ color: 'var(--primary-pink)' }} />
+        {activeSubTab === 'orders' && (
+          <div className="animate-fade-in">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '20px', color: 'var(--dark-pink)', margin: 0 }}>Customer Booking Requests ({orders.length})</h3>
+                <button 
+                  onClick={fetchOrders}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 14px', borderRadius: '15px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  disabled={ordersLoading}
+                >
+                  {ordersLoading && <Loader2 size={12} className="animate-spin" />}
+                  Refresh Orders
+                </button>
               </div>
-            ) : orders.length === 0 ? (
-              <div style={{
-                background: 'var(--white)',
-                padding: '48px',
-                borderRadius: '16px',
-                textAlign: 'center',
-                border: '1px solid var(--gray-100)',
-                color: 'var(--gray-600)'
-              }}>
-                No orders placed yet.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {orders.map((o) => (
-                  <div 
-                    key={o.id}
-                    style={{
-                      background: 'var(--white)',
-                      border: '1px solid var(--gray-200)',
-                      borderRadius: '16px',
-                      padding: '24px',
-                      boxShadow: 'var(--shadow-sm)'
-                    }}
-                  >
-                    {/* Top Row Order ID and Status selection */}
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '12px',
-                      borderBottom: '1px dashed var(--gray-100)',
-                      paddingBottom: '16px',
-                      marginBottom: '16px'
-                    }}>
-                      <div>
-                        <strong style={{ fontSize: '16px', color: 'var(--dark-pink)' }}>Order #{o.id}</strong>
-                        <span style={{ fontSize: '11px', color: 'var(--gray-600)', marginLeft: '12px' }}>
-                          Placed on: {new Date(o.createdAt).toLocaleString()}
-                        </span>
-                      </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {/* Status update select */}
-                        <select
-                          value={o.status}
-                          onChange={(e) => handleStatusChange(o.id, e.target.value)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--gray-200)',
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            backgroundColor: o.status === 'Completed' ? '#ecfdf5' : o.status === 'Processing' ? '#eff6ff' : o.status === 'Cancelled' ? '#fef2f2' : '#fffbeb',
-                            color: o.status === 'Completed' ? '#10b981' : o.status === 'Processing' ? '#3b82f6' : o.status === 'Cancelled' ? '#ef4444' : '#d97706',
-                          }}
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Processing">Processing</option>
-                          <option value="Completed">Completed</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
-
-                        <button
-                          onClick={() => handleDeleteOrder(o.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
-                          title="Delete Order Record"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Customer & Delivery Information grid */}
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: '24px',
-                      marginBottom: '20px',
-                      fontSize: '13px'
-                    }} className="order-details-info">
-                      
-                      <div>
-                        <h4 style={{ color: 'var(--primary-pink)', marginBottom: '8px', fontWeight: '800' }}>Customer Details</h4>
-                        <p style={{ margin: '4px 0' }}><strong>Name:</strong> {o.customerName}</p>
-                        <p style={{ margin: '4px 0' }}><strong>Phone:</strong> {o.customerPhone}</p>
-                        <button
-                          onClick={() => handleChatWithCustomer(o)}
-                          className="btn btn-secondary"
-                          style={{
-                            padding: '6px 12px',
-                            fontSize: '12px',
-                            borderRadius: '12px',
-                            marginTop: '8px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            borderColor: '#25D366',
-                            color: '#25D366'
-                          }}
-                        >
-                          <MessageSquare size={12} style={{ fill: 'currentColor', stroke: 'none' }} />
-                          WhatsApp Customer
-                        </button>
-                      </div>
-
-                      <div>
-                        <h4 style={{ color: 'var(--primary-pink)', marginBottom: '8px', fontWeight: '800' }}>Delivery Details</h4>
-                        <p style={{ margin: '4px 0' }}><strong>Mode:</strong> {o.deliveryType}</p>
-                        <p style={{ margin: '4px 0' }}><strong>Date:</strong> {o.deliveryDate}</p>
-                        <p style={{ margin: '4px 0' }}><strong>Time Slot:</strong> {o.deliveryTimeSlot}</p>
-                        <p style={{ margin: '4px 0' }}><strong>Address:</strong> {o.address}</p>
-                        {o.notes && <p style={{ margin: '4px 0', color: 'var(--gray-600)' }}><strong>Instructions:</strong> "{o.notes}"</p>}
-                      </div>
-
-                    </div>
-
-                    {/* Order items listing */}
-                    <div style={{
-                      background: 'var(--soft-pink-bg)',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      fontSize: '13px'
-                    }}>
-                      <h4 style={{ color: 'var(--dark-pink)', marginBottom: '10px', fontWeight: '800' }}>Items Ordered ({o.items.length})</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {o.items.map((item, idx) => (
-                          <div key={idx} style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: idx === o.items.length - 1 ? 'none' : '1px solid rgba(240, 98, 146, 0.1)',
-                            paddingBottom: '8px',
-                            alignItems: 'center'
-                          }}>
-                            <div>
-                              <strong>{item.name}</strong> <span style={{ color: 'var(--gray-600)' }}>x {item.quantity}</span>
-                              {item.customNote && (
-                                <div style={{ fontSize: '11px', color: 'var(--primary-pink)', fontStyle: 'italic', marginTop: '2px' }}>
-                                  Custom Text: "{item.customNote}"
-                                </div>
-                              )}
-                            </div>
-                            <span style={{ fontWeight: '700', color: 'var(--gray-800)' }}>₹{item.price * item.quantity}</span>
-                          </div>
-                        ))}
-                      </div>
-
+              {ordersLoading && orders.length === 0 ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+                  <Loader2 className="animate-spin" size={30} style={{ color: 'var(--primary-pink)' }} />
+                </div>
+              ) : orders.length === 0 ? (
+                <div style={{
+                  background: 'var(--white)',
+                  padding: '48px',
+                  borderRadius: '16px',
+                  textAlign: 'center',
+                  border: '1px solid var(--gray-100)',
+                  color: 'var(--gray-600)'
+                }}>
+                  No orders placed yet.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {orders.map((o) => (
+                    <div 
+                      key={o.id}
+                      style={{
+                        background: 'var(--white)',
+                        border: '1px solid var(--gray-200)',
+                        borderRadius: '16px',
+                        padding: '24px',
+                        boxShadow: 'var(--shadow-sm)'
+                      }}
+                    >
+                      {/* Top Row Order ID and Status selection */}
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
-                        marginTop: '12px',
-                        paddingTop: '12px',
-                        borderTop: '1px solid rgba(240, 98, 146, 0.2)',
-                        fontWeight: '800',
-                        fontSize: '15px'
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        borderBottom: '1px dashed var(--gray-100)',
+                        paddingBottom: '16px',
+                        marginBottom: '16px'
                       }}>
-                        <span>Total Paid/Booking Value:</span>
-                        <span style={{ color: 'var(--dark-pink)' }}>₹{o.total}</span>
-                      </div>
-                    </div>
+                        <div>
+                          <strong style={{ fontSize: '16px', color: 'var(--dark-pink)' }}>Order #{o.id}</strong>
+                          <span style={{ fontSize: '11px', color: 'var(--gray-600)', marginLeft: '12px' }}>
+                            Placed on: {new Date(o.createdAt).toLocaleString()}
+                          </span>
+                        </div>
 
-                  </div>
-                ))}
-              </div>
-            )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {/* Status update select */}
+                          <select
+                            value={o.status}
+                            onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid var(--gray-200)',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              backgroundColor: o.status === 'Completed' ? '#ecfdf5' : o.status === 'Processing' ? '#eff6ff' : o.status === 'Cancelled' ? '#fef2f2' : '#fffbeb',
+                              color: o.status === 'Completed' ? '#10b981' : o.status === 'Processing' ? '#3b82f6' : o.status === 'Cancelled' ? '#ef4444' : '#d97706',
+                            }}
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+
+                          <button
+                            onClick={() => handleDeleteOrder(o.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
+                            title="Delete Order Record"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Customer & Delivery Information grid */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '24px',
+                        marginBottom: '20px',
+                        fontSize: '13px'
+                      }} className="order-details-info">
+                        
+                        <div>
+                          <h4 style={{ color: 'var(--primary-pink)', marginBottom: '8px', fontWeight: '800' }}>Customer Details</h4>
+                          <p style={{ margin: '4px 0' }}><strong>Name:</strong> {o.customerName}</p>
+                          <p style={{ margin: '4px 0' }}><strong>Phone:</strong> {o.customerPhone}</p>
+                          <button
+                            onClick={() => handleChatWithCustomer(o)}
+                            className="btn btn-secondary"
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: '12px',
+                              borderRadius: '12px',
+                              marginTop: '8px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              borderColor: '#25D366',
+                              color: '#25D366'
+                            }}
+                          >
+                            <MessageSquare size={12} style={{ fill: 'currentColor', stroke: 'none' }} />
+                            WhatsApp Customer
+                          </button>
+                        </div>
+
+                        <div>
+                          <h4 style={{ color: 'var(--primary-pink)', marginBottom: '8px', fontWeight: '800' }}>Delivery Details</h4>
+                          <p style={{ margin: '4px 0' }}><strong>Mode:</strong> {o.deliveryType}</p>
+                          <p style={{ margin: '4px 0' }}><strong>Date:</strong> {o.deliveryDate}</p>
+                          <p style={{ margin: '4px 0' }}><strong>Time Slot:</strong> {o.deliveryTimeSlot}</p>
+                          <p style={{ margin: '4px 0' }}><strong>Address:</strong> {o.address}</p>
+                          {o.notes && <p style={{ margin: '4px 0', color: 'var(--gray-600)' }}><strong>Instructions:</strong> "{o.notes}"</p>}
+                        </div>
+
+                      </div>
+
+                      {/* Order items listing */}
+                      <div style={{
+                        background: 'var(--soft-pink-bg)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        fontSize: '13px'
+                      }}>
+                        <h4 style={{ color: 'var(--dark-pink)', marginBottom: '10px', fontWeight: '800' }}>Items Ordered ({o.items.length})</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {o.items.map((item, idx) => (
+                            <div key={idx} style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              borderBottom: idx === o.items.length - 1 ? 'none' : '1px solid rgba(240, 98, 146, 0.1)',
+                              paddingBottom: '8px',
+                              alignItems: 'center'
+                            }}>
+                              <div>
+                                <strong>{item.name}</strong> <span style={{ color: 'var(--gray-600)' }}>x {item.quantity}</span>
+                                {item.customNote && (
+                                  <div style={{ fontSize: '11px', color: 'var(--primary-pink)', fontStyle: 'italic', marginTop: '2px' }}>
+                                    Custom Text: "{item.customNote}"
+                                  </div>
+                                )}
+                              </div>
+                              <span style={{ fontWeight: '700', color: 'var(--gray-800)' }}>₹{item.price * item.quantity}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginTop: '12px',
+                          paddingTop: '12px',
+                          borderTop: '1px solid rgba(240, 98, 146, 0.2)',
+                          fontWeight: '800',
+                          fontSize: '15px'
+                        }}>
+                          <span>Total Paid/Booking Value:</span>
+                          <span style={{ color: 'var(--dark-pink)' }}>₹{o.total}</span>
+                        </div>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+        )}
+
+        {activeSubTab === 'products' && (
+          <div className="animate-fade-in">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+              <h3 style={{ fontSize: '20px', color: 'var(--dark-pink)', margin: 0 }}>Manage Products ({products?.length || 0})</h3>
+              <input 
+                type="text" 
+                placeholder="Search products..." 
+                value={productSearchQuery}
+                onChange={(e) => setProductSearchQuery(e.target.value)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid var(--light-pink)',
+                  fontSize: '14px',
+                  width: '100%',
+                  maxWidth: '300px',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <div style={{ overflowX: 'auto', background: 'var(--white)', borderRadius: '16px', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                <thead>
+                  <tr style={{ backgroundColor: 'var(--soft-pink-bg)', borderBottom: '1px solid var(--light-pink)', textAlign: 'left' }}>
+                    <th style={{ padding: '16px', color: 'var(--dark-pink)', fontWeight: '800' }}>Image</th>
+                    <th style={{ padding: '16px', color: 'var(--dark-pink)', fontWeight: '800' }}>Name</th>
+                    <th style={{ padding: '16px', color: 'var(--dark-pink)', fontWeight: '800' }}>Category</th>
+                    <th style={{ padding: '16px', color: 'var(--dark-pink)', fontWeight: '800' }}>Price</th>
+                    <th style={{ padding: '16px', color: 'var(--dark-pink)', fontWeight: '800' }}>Stock</th>
+                    <th style={{ padding: '16px', color: 'var(--dark-pink)', fontWeight: '800', textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--gray-600)' }}>No products found.</td>
+                    </tr>
+                  ) : (
+                    filteredProducts.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid var(--gray-100)' }}>
+                        <td style={{ padding: '12px 16px' }}>
+                          <img 
+                            src={p.image} 
+                            alt={p.name} 
+                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--light-pink)' }}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: '600', color: 'var(--gray-800)' }}>{p.name}</td>
+                        <td style={{ padding: '12px 16px', color: 'var(--gray-600)' }}>{p.category}</td>
+                        <td style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--dark-pink)' }}>₹{p.price}</td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{
+                            padding: '4px 10px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            backgroundColor: p.inStock ? '#ecfdf5' : '#fef2f2',
+                            color: p.inStock ? '#10b981' : '#ef4444'
+                          }}>
+                            {p.inStock ? 'In Stock' : 'Out of Stock'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button 
+                              onClick={() => handleEditProduct(p)}
+                              className="btn btn-secondary"
+                              style={{ padding: '6px 12px', borderRadius: '12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <Edit size={12} />
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteProduct(p.id)}
+                              className="btn btn-secondary"
+                              style={{ padding: '6px 12px', borderRadius: '12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#ef4444', color: '#ef4444' }}
+                            >
+                              <Trash2 size={12} />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+        )}
 
       </div>
 
@@ -658,7 +802,7 @@ export default function AdminPortal({ products, refreshProducts }) {
           }} onClick={(e) => e.stopPropagation()}>
             
             <h3 style={{ fontSize: '22px', color: 'var(--dark-pink)', marginBottom: '24px', fontWeight: '800' }}>
-              Add New Product Collection
+              {editingProduct ? 'Edit Product Details' : 'Add New Product Collection'}
             </h3>
 
             <form onSubmit={handleProductSubmit}>
