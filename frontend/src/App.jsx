@@ -105,32 +105,36 @@ function MainApp() {
         }));
         setProducts(formatted);
       } else {
-        // If table is completely empty, seed it with INITIAL_PRODUCTS
-        console.log('Database table "products" is empty. Seeding seedData...');
-        const seedRows = INITIAL_PRODUCTS.map(p => ({
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          price: p.price,
-          category: p.category,
-          image: p.image,
-          tags: p.tags || [],
-          in_stock: p.inStock,
-          rating: p.rating || 5.0,
-          reviews: p.reviews || 0
-        }));
+        if (INITIAL_PRODUCTS && INITIAL_PRODUCTS.length > 0) {
+          // If table is completely empty, seed it with INITIAL_PRODUCTS
+          console.log('Database table "products" is empty. Seeding seedData...');
+          const seedRows = INITIAL_PRODUCTS.map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            price: p.price,
+            category: p.category,
+            image: p.image,
+            tags: p.tags || [],
+            in_stock: p.inStock,
+            rating: p.rating || 5.0,
+            reviews: p.reviews || 0
+          }));
 
-        const { error: seedError } = await supabase.from('products').insert(seedRows);
-        if (seedError) throw seedError;
+          const { error: seedError } = await supabase.from('products').insert(seedRows);
+          if (seedError) throw seedError;
 
-        // Fetch again after seeding
-        const { data: refetchedData, error: refetchError } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
+          // Fetch again after seeding
+          const { data: refetchedData, error: refetchError } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        if (refetchError) throw refetchError;
-        setProducts((refetchedData || []).map(p => ({ ...p, inStock: p.in_stock })));
+          if (refetchError) throw refetchError;
+          setProducts((refetchedData || []).map(p => ({ ...p, inStock: p.in_stock })));
+        } else {
+          setProducts([]);
+        }
       }
     } catch (err) {
       console.error('Failed to load products from database:', err);

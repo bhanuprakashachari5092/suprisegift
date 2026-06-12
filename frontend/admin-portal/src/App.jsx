@@ -27,30 +27,34 @@ function MainApp() {
           inStock: p.in_stock
         })));
       } else {
-        // Seed database if empty
-        console.log('Database table "products" is empty. Seeding seedData...');
-        const seedRows = INITIAL_PRODUCTS.map(p => ({
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          price: p.price,
-          category: p.category,
-          image: p.image,
-          tags: p.tags || [],
-          in_stock: p.inStock,
-          rating: p.rating || 5.0,
-          reviews: p.reviews || 0
-        }));
+        if (INITIAL_PRODUCTS && INITIAL_PRODUCTS.length > 0) {
+          // Seed database if empty
+          console.log('Database table "products" is empty. Seeding seedData...');
+          const seedRows = INITIAL_PRODUCTS.map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            price: p.price,
+            category: p.category,
+            image: p.image,
+            tags: p.tags || [],
+            in_stock: p.inStock,
+            rating: p.rating || 5.0,
+            reviews: p.reviews || 0
+          }));
 
-        const { error: seedError } = await supabase.from('products').insert(seedRows);
-        if (seedError) throw seedError;
+          const { error: seedError } = await supabase.from('products').insert(seedRows);
+          if (seedError) throw seedError;
 
-        const { data: refetchedData } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
+          const { data: refetchedData } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        setProducts((refetchedData || []).map(p => ({ ...p, inStock: p.in_stock })));
+          setProducts((refetchedData || []).map(p => ({ ...p, inStock: p.in_stock })));
+        } else {
+          setProducts([]);
+        }
       }
     } catch (err) {
       console.error('Failed to load products from database:', err);
